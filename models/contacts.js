@@ -6,10 +6,23 @@
 
 const Contact = require('../models/contact'); //schema
 
-const listContacts = async () => {
+// Update the listContacts function to support pagination and filtering by favorite:
+const listContacts = async (userId, {page = 1, limit = 20, favorite}) => {
   // const data = await fs.readFile(contactsPath, 'utf-8');
   // return JSON.parse(data);
-  return await Contact.find({});
+  const skip = (page - 1) * limit;
+  const filter = {owner: userId};
+  if (favorite !== undefined) {
+    filter.favorite = favorite === 'true';
+  }
+  const contacts = await Contact.find(filter)
+    .skip(skip)
+    .limit(parseInt(limit))
+    .populate('owner', 'email subscription');
+
+  // return await Contact.find({});
+  return contacts;
+
 };
 
 const getContactById = async (contactId) => {

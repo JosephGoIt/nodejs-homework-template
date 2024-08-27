@@ -1,5 +1,16 @@
 const express = require('express');
 const Joi = require('joi');
+// const {
+//   listContacts,
+//   getContactById,
+//   removeContact,
+//   addContact,
+//   updateContact,
+//   updateStatusContact,
+// } = require('../../models/contacts');
+
+// apply middleware
+const auth = require('../../middlewares/auth');
 const {
   listContacts,
   getContactById,
@@ -22,9 +33,10 @@ const favoriteSchema = Joi.object({
   favorite: Joi.boolean().required(),
 });
 
-router.get('/', async (req, res, next) => {
+// add auth
+router.get('/', auth, async (req, res, next) => {
   try {
-    const contacts = await listContacts();
+    const contacts = await listContacts(req.user._id, req.query); // added req.user._id, req.query
     res.status(200).json(contacts);
   } catch (error) {
     next(error);
@@ -32,7 +44,8 @@ router.get('/', async (req, res, next) => {
   // res.json({ message: 'template message' })
 });
 
-router.get('/:contactId', async (req, res, next) => {
+// add auth
+router.get('/:contactId', auth, async (req, res, next) => {
   try {
     const contact = await getContactById(req.params.contactId);
     if (contact) {
@@ -46,7 +59,8 @@ router.get('/:contactId', async (req, res, next) => {
   // res.json({ message: 'template message' })
 });
 
-router.post('/', async (req, res, next) => {
+// add auth
+router.post('/', auth, async (req, res, next) => {
   try {
     const {error} = contactSchema.validate(req.body);
     if (error) {
@@ -60,7 +74,8 @@ router.post('/', async (req, res, next) => {
   // res.json({ message: 'template message' })
 });
 
-router.delete('/:contactId', async (req, res, next) => {
+// add auth
+router.delete('/:contactId', auth, async (req, res, next) => {
   try {
     const success =  await removeContact(req.params.contactId);
     if (success) {
@@ -74,7 +89,8 @@ router.delete('/:contactId', async (req, res, next) => {
   // res.json({ message: 'template message' })
 });
 
-router.put('/:contactId', async (req, res, next) => {
+// add auth
+router.put('/:contactId', auth, async (req, res, next) => {
   try {
     if (Object.keys(req.body).length === 0) {
       return res.status(400),json({message: 'missing fields'});
@@ -91,7 +107,8 @@ router.put('/:contactId', async (req, res, next) => {
   // res.json({ message: 'template message' })
 });
 
-router.patch('/:contactId/favorite', async (req, res, next) => {
+// add auth
+router.patch('/:contactId/favorite', auth, async (req, res, next) => {
   try {
     const { error } = favoriteSchema.validate(req.body);
     if (error) {
