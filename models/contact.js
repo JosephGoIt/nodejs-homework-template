@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
 const {Schema} = mongoose;
 
-// Added owner to the Schema
 const contactSchema = new Schema({
     name: {
         type: String,
