@@ -17,6 +17,7 @@ const auth = async (req, res, next) => {
       return res.status(401).json({ message: "Not authorized" });
     }
 
+    // Attach the user to the request object
     req.user = user;
     next();
   } catch (err) {
