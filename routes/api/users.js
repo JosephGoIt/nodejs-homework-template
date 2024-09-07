@@ -250,17 +250,19 @@ const subscriptionSchema = Joi.object({
   });
   
 
-// resend verification
+// POST route to resend verification email
 router.post('/verify', async (req, res, next) => {
   const { email } = req.body;
 
+  // Validate email input
   if (!email) {
-    return res.status(400).json({ message: 'missing required field email' });
+    return res.status(400).json({ message: 'Missing required field email' });
   }
 
   try {
+    // Find the user by email
     const user = await User.findOne({ email });
-    
+
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
@@ -269,39 +271,28 @@ router.post('/verify', async (req, res, next) => {
       return res.status(400).json({ message: 'Verification has already been passed' });
     }
 
+    // Generate the verification link
     const verificationUrl = `${req.protocol}://${req.get('host')}/api/users/verify/${user.verificationToken}`;
 
-    const options = {
-      method: 'POST',
-      url: 'https://rapidprod-sendgrid-v1.p.rapidapi.com/mail/send',
-      headers: {
-        'x-rapidapi-key': 'fe5b783b33msh902a4057671f858p1517f7jsn3210a04ec37b',
-        'x-rapidapi-host': 'rapidprod-sendgrid-v1.p.rapidapi.com',
-        'Content-Type': 'application/json'
-      },
-      data: {
-        personalizations: [{
-          to: [{ email: user.email }],
-          subject: 'Verify your email'
-        }],
-        from: { email: 'no-reply@example.com' },
-        content: [{
-          type: 'text/plain',
-          value: `Click the link to verify your email: ${verificationUrl}`
-        }]
-      }
+    // Send the email
+    const mailOptions = {
+      from: process.env.EMAIL_USER,  // Sender email address
+      to: email,                     // Receiver email address
+      subject: 'Verify your email',   // Subject line
+      text: `Click the link to verify your email: ${verificationUrl}`  // Email body
     };
 
-    // Log email sending info
-    console.log('Sending verification email to:', email);
-    console.log('Email content:', options.data.content[0].value);
+    // Send the email using Nodemailer
+    await transporter.sendMail(mailOptions);
 
-    await axios.request(options);
+    console.log('Verification email sent to:', email);
+
+    // Respond with success
     res.status(200).json({ message: 'Verification email sent' });
-    console.log('Email sent successfully:', response.data);
 
   } catch (error) {
-    next(error);
+    console.error('Error sending verification email:', error.message);
+    res.status(500).json({ message: 'Internal server error' });
   }
 });
 
