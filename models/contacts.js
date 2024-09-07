@@ -1,15 +1,7 @@
-// const fs = require('fs/promises');
-// const path = require('path');
-// const {v4: uuidv4} = require('uuid');
-
-// const contactsPath = path.join(__dirname, 'contacts.json');
-
 const Contact = require('../models/contact'); //schema
 
 // Update the listContacts function to support pagination and filtering by favorite:
 const listContacts = async (userId, {page = 1, limit = 20, favorite}) => {
-  // const data = await fs.readFile(contactsPath, 'utf-8');
-  // return JSON.parse(data);
   const skip = (page - 1) * limit;
   const filter = {owner: userId};
   if (favorite !== undefined) {
@@ -19,45 +11,24 @@ const listContacts = async (userId, {page = 1, limit = 20, favorite}) => {
     .skip(skip)
     .limit(parseInt(limit))
     .populate('owner', 'email subscription');
-
-  // return await Contact.find({});
   return contacts;
 
 };
 
 const getContactById = async (contactId) => {
-  // const contacts = await listContacts();
-  // return contacts.find(contact => contact.id === contactId) || null;
   return await Contact.findById(contactId)
 };
 
 const removeContact = async (contactId) => {
-  // const contacts = await listContacts();
-  // const filteredContacts = contacts.filter(contact => contact.id !== contactId);
-  // await fs.writeFile(contactsPath, JSON.stringify(contacts, null, 2));
-  // return contacts.length !== filteredContacts.length;
   return await Contact.findByIdAndDelete(contactId);
 };
 
 const addContact = async (body) => {
-  // const contacts = await listContacts();
-  // const newContact = {id: uuidv4(), ...body};
-  // contacts.push(newContact);
-  // await fs.writeFile(contactsPath, JSON.stringify(contacts, null, 2));
-  // return newContact;
   const contact = new Contact(body);
   return await contact.save();
 };
 
 const updateContact = async (contactId, body) => {
-  // const contacts = await listContacts();
-  // const index = contacts.findIndex(contact => contact.id === contactId);
-  // if(index === -1) {
-  //   return null;
-  // }
-  // contacts[index] = {...contacts[index], ...body};
-  // await fs.writeFile(contactsPath, JSON.stringify(contacts, null, 2));
-  // return contacts[index];
   return await Contact.findByIdAndUpdate(contactId, body, { new: true });
 };
 
