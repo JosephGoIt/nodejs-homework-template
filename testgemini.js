@@ -26,7 +26,7 @@ const {
       ],
     });
   
-    const result = await chatSession.sendMessage("what started world war 1?");
+    const result = await chatSession.sendMessage("Who is Han Xin?");
     console.log(result.response.text());
   }
   
